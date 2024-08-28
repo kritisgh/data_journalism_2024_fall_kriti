@@ -1,6 +1,6 @@
 ---
 title: "Class Reference"
-author: "Derek Willis"
+author: "Kriti Singh"
 output:
   html_document:
     theme: cerulean
