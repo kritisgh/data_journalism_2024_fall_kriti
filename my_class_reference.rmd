@@ -38,7 +38,7 @@ install.packages("tidyverse")
 library(tidyverse)
 ```
 
-###Adding readr and dpylr
+### Adding readr and dpylr
 ```{r}
 library(readr)
 library(dplyr)
@@ -58,9 +58,9 @@ glimpse(maryland_winred_contributions)
 ```{r}
 head(maryland_winred_contributions)
 ```
-###counting number of contributions to each recipient
+### counting number of contributions to each recipient
 
-###First it takes all contributions: maryland_winred_contributions, next, groups are created for each unique contributions for the same candidate, summary then performs a summary operation for each group created, ie., here, counts number of rows in each group
+### First it takes all contributions: maryland_winred_contributions, next, groups are created for each unique contributions for the same candidate, summary then performs a summary operation for each group created, ie., here, counts number of rows in each group
 
 ### difference between group_by and summarise: splits the data into groups on one or more variables. does not change the data itself, changes how subsequent operations are applied to the data. summarize, (i think) works on the groups created by group_by
 ```{r}
@@ -70,7 +70,7 @@ maryland_winred_contributions |>
     count_contribs = n()
   )
 ```
-###group by “memo_text” and “date” to see how many contributions occurred on every date to every recipient. sorting by the count of contributions in descending order.
+### group by “memo_text” and “date” to see how many contributions occurred on every date to every recipient. sorting by the count of contributions in descending order.
 ```{r}
 maryland_winred_contributions |>
   group_by(memo_text, date) |>
