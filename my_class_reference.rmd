@@ -26,6 +26,10 @@ The command to set a working directory is setwd(). For example, this sets the wo
 ```{r}
 setwd("~/jour472/data_journalism_2024_fall")
 ```
+Here's how to add code: 
+```{r}
+2+2
+```
 
 ### How to install and load the tidyverse
 
@@ -33,3 +37,60 @@ setwd("~/jour472/data_journalism_2024_fall")
 install.packages("tidyverse")
 library(tidyverse)
 ```
+
+###Adding readr and dpylr
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+```
+
+### importing data
+```{r}
+maryland_winred_contributions <- read_rds("https://thescoop.org/files/maryland_winred.rds")
+```
+
+### glimpse: function to get an overview of the data, the metadata of the data (remember to run tidyverse every single time)
+```{r}
+glimpse(maryland_winred_contributions)
+```
+### head: returns first 6 rows by default, can return n if head(x,n=number), x = input, dataset n = number of rows head should return
+```{r}
+head(maryland_winred_contributions)
+```
+###counting number of contributions to each recipient
+
+###First it takes all contributions: maryland_winred_contributions, next, groups are created for each unique contributions for the same candidate, summary then performs a summary operation for each group created, ie., here, counts number of rows in each group
+
+### difference between group_by and summarise: splits the data into groups on one or more variables. does not change the data itself, changes how subsequent operations are applied to the data. summarize, (i think) works on the groups created by group_by
+```{r}
+maryland_winred_contributions |>
+  group_by(memo_text) |>
+  summarise(
+    count_contribs = n()
+  )
+```
+###group by “memo_text” and “date” to see how many contributions occurred on every date to every recipient. sorting by the count of contributions in descending order.
+```{r}
+maryland_winred_contributions |>
+  group_by(memo_text, date) |>
+  summarise(
+    count_contribs = n()
+  ) |>
+  arrange(desc(count_contribs))
+```
+### summarizing using mean, median
+```{r}
+maryland_winred_contributions |>
+  group_by(memo_text) |>
+  summarise(
+    count_contribs = n(),
+    total_amount = sum(amount),
+    mean_amount = mean(amount),
+    median_amount = median(amount),
+    min_amount = min(amount),
+    max_amount = max(amount)
+  ) |>
+  arrange(desc(max_amount))
+```
+
