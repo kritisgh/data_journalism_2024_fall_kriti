@@ -1,0 +1,118 @@
+---
+title: "lab_01"
+author: "Derek Willis"
+date: "2024-08-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Turn off scientific notation
+options(scipen=999)
+```
+
+## About this lab
+
+To complete this lab, you need to: \* run existing code as directed (look for **Task**). \* modify existing code as directed (look for **Task**). \* write code in empty codeblocks provided to answer questions included (look for **Q**). \* write out the answer in the form of a complete sentence in the space given (look for **A**). When you are finished, commit changes and push to your personal GitHub repo, then submit the URL to this document on ELMS.
+
+Remember to add any new verbs or concepts to your reference notebook!
+
+## Load libraries and establish settings
+
+**Task** Run the codeblock below to load the Tidyverse. To run the codeblock, hit the little green play button in the upper right corner of the gray area (the codeblock) below.
+
+```{r}
+# Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
+# install.packages('tidyverse')
+library(tidyverse)
+```
+
+## Load Data
+
+We're going to load the slice of WinRed contribution data from West Virginia, which is in a file called `lab_01.rds`
+
+**Task** Using the example from the pre_lab, write code to load the RDS file and assign it to a good variable name.
+
+```{r}
+loaded_file <- read_rds("lab_01.rds")
+```
+
+## Examine Data
+
+**Task** Run the codeblock below to use glimpse to get a sense of the column names, types and sample data.
+
+
+**Q1** How many rows and columns does this dataframe have?
+
+**A1** 40,441 rows and 24 columns
+
+```{r}
+glimpse(loaded_file)
+```
+
+## Answer questions
+
+**Q2** Which West Virginia city provided the largest number of contributions? How many?
+
+**A2** Charleston, 3226 contributions
+
+```{r}
+sorted_file <- loaded_file |>
+group_by(city) |>
+  summarise(count = n())|>
+  arrange(desc(count))
+```
+
+**Q3** Which West Virginia cities accounted for the fewest contributions? How many of them, roughly speaking?
+
+**A3** 63 WV cities accounted for the fewest contributions. I stored the resulting file from the previous codeblock and ran a tail function on it. Passing 70 as the number of rows I wanted displayed is when I finally came across more than one contributions. 
+Tallmansville, Valley Fork, Walkersville, Wana, Wayside, West Liberty, West Ville			Winifrede, Wolfcreek, milton are some cities with just one contribution each.
+
+```{r}
+tail(sorted_file, 70)
+tail(sorted_file, 10)
+```
+
+**Q4** What's your best educated guess to explain why the city identified in question 2 had more contributions compared to the cities identified in question 3? Hint: you won't find the answer in the data, you'll need to do some quick web research. You do not need to write any code for this question, so no codeblock is provided.
+
+**A4** Charleston is the capital of West Virginia and also the most populous. When I searched some of the cities I mentioned in question 3 on Google, it turns out they're not even cities. Wana, Winifrede, Wolfcreek, Wayside are all  unincorporated communities so I don't understand why they're under the variable 'city' in this dataset. My educated guess is there aren't a lot of people living in these unincorporated communities or the census is convoluted for such places.
+
+**Q5** What recipient got the largest total amount of money? How many contributions did they receive and what was the average donation?
+
+**A5** TRUMP NATIONAL COMMITTEE JFC, INC. (C00873893) with 14063 contrubutions. Average amount: $32.9904288
+
+```{r}
+loaded_file |>
+  group_by(memo_text) |>
+  summarise(
+    count_contribs = n(),
+    mean_amount = mean(amount),
+  ) |>
+  arrange(desc(count_contribs))
+```
+
+**Q6** What is that top recipient and what explains its popularity? Hint: this will require web research, you won't be able to answer this purely from the data set. You do not need to write any code for this question, so no codeblock is provided.
+
+**A6** Trump is the most popular recipient. According to a Washington Post article, Trump "has promised to revitalize the steel industry in this part of the country, along with West Virginia's coal industry." "West Virginia has seen a boom in coal-industry jobs since Trump took office and coal companies are now holding job fairs in the southern part of the state, which has suffered from poverty that has been entrenched for generations." src: https://www.washingtonpost.com/news/post-politics/wp/2017/08/03/why-is-trump-rallying-in-west-virginias-huntington-because-hes-mostly-popular-there/
+I learnt that West Virginia is a top coal producer in the US but coal exports declined 40% in 2013 (src: https://en.wikipedia.org/wiki/West_Virginia) Trump selling the dream of bringing coal jobs back to people could be the reason behind his popularity. 
+
+**Q7**. Using the answer from A5 as a starting point, produce a summary table that has the following information for each recipient: \* count of contributions \* total amount of all contributions \* the average contribution amount \* the median contribution amount \* the smallest contribution amount \* the largest contribution amount
+
+Store it as a variable object called `wv_summary` so that you can examine it with the data viewer. What newsworthy nuggets jump out at you that you could imagine dropping into a news story? Write a few summary sentences with overall findings.
+
+**A7**. Newsworthy nuggets: Seeing the average donation for WEST VIRGINIA REPUBLICAN PARTY being $129 makes me wonder what their campaigning tactics are. That seems like a very high amount to me. Similarly, MOORE FOR WEST VIRGINIA, INC. has an average donation amount of 380 dollars although it seems skewed by the outlier max amount of \$3300.00. The data reveals people highly support Trump because it dominates both in highest number of contributions and highest amount. An interesting field to me was 	
+Refund of Earmarked Contribution. From my understanding, this field is when a committee refunds a contribution to a donor. There are 1298 refunds so I wonder if it is a volatile landscape and what makes donors change their mind. I wish to know exactly how many refund requests were made toward each committee.
+
+```{r}
+wv_summary <- loaded_file |>
+  group_by(memo_text) |>
+  summarise(
+    count_contribs = n(),
+    total_amount = sum(amount),
+    mean_amount = mean(amount),
+    median_amount = median(amount),
+    min_amount = min(amount),
+    max_amount = max(amount)
+  ) |>
+  arrange(desc(total_amount))
+```
