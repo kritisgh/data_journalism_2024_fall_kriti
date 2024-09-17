@@ -382,7 +382,7 @@ cleaned_conowingo
 
 ### Task 16: Clean up city field more with case_when()
 
-**Task** Run the following codeblock to use case_when() to fix misspellings of Conowingo in the "city" field using both the exact match method and the str_detect() method. How many mispellings of Conowingo remain after running this code? Answer below. Add a description of what this code does to your reference notebook. **Answer** 0 mispellings. 
+**Task** Run the following codeblock to use case_when() to fix misspellings of Conowingo in the "city" field using both the exact match method and the str_detect() method. How many mispellings of Conowingo remain after running this code? Answer below. Add a description of what this code does to your reference notebook. **Answer** 0 mispellings.
 
 ```{r}
 # cleaning function
