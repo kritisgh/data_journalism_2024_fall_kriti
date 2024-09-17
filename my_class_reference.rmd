@@ -101,3 +101,7 @@ read_csv is a tidyverse function, understands what data types are there. better 
 r sorts data not just alphabetically but also acc to case 
 read.csv is a base R function (forget this exists)
 clean the dataset and turn it into a shape you like and THEN work with it
+when you have dates look for the boundaries
+spaces in col names are the devil 
+dont start col names beginning w a number
+rename only works on column names, does not change data 
