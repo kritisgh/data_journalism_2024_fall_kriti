@@ -1,0 +1,109 @@
+---
+title: "lab_03"
+author: "Derek Willis"
+date: "2024-08-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries and establish settings
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse
+library(tidyverse)
+
+# Load janitor
+library(janitor)
+```
+
+## Load data
+
+```{r}
+# Load MD slice of FEC House candidate contribution data
+md_contribs <- read_rds("data/lab_03.rds")
+```
+
+## Fix header issues
+
+You'll need to fix one issue with the column names using janitor. Write a code block to do that, making sure that you save the results to the same dataframe.
+
+```{r}
+md_contribs <- md_contribs |>
+  clean_names()
+```
+
+
+## Answer questions
+
+Q1: Which seven cities in Maryland had the largest *number* of contributions from donors? How many did each have? To answer this question, you'll have to clean the messy "contributor_city" field.
+
+Note: To answer this question, you'll need to see every variation of the "contributor_city" for the top seven cities, which you should identify through some initial analysis. Then find variations of them and change those variations into the most common version.
+
+A1: Bethesda, Chevy Chase, Baltimore, Annapolis, Potomac, Silver Spring, Rockville are the top 7 cities. 
+
+```{r}
+md_contribs_city <- md_contribs |>
+  group_by(contributor_city) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
+```
+
+```{r}
+# cleaning function
+md_contribs <- md_contribs |>
+  clean_names() |> 
+  mutate(city = str_to_title(contributor_city)) |>
+  mutate(city = case_when(
+    city == "Balrimore" | city == "Blatimore" ~ "Baltimore",
+    city == "Anapolis" ~ "Annapolis",
+    city == "Potamic" ~ "Potomac",
+    city == "Silver Springs" ~ "Silver Spring",
+    city == "Rockwell" ~ "Rockville",
+    .default = city
+  ))
+
+# display the cleaned dataset
+md_contribs
+```
+Q2: Find the 5-digit ZIP code in Maryland that had the highest total amount of contributions (by dollar value). You will need to use mutate to ensure that you have a zip code column with the first five characters from the existing zip code column.
+
+Where is that zip code and what kind of area is it, demographically? Which committee is the largest recipient of money from that zip code? How many of the top five recipients are Maryland candidates?
+
+A2: 20817 is zip code with highest total amount of contributions. According to census data (src: https://data.census.gov/table/ACSST5Y2022.S0102?q=20817) it is 67.4% white, mostly middle aged to senior citizen people. JOHNNY O FOR CONGRESS is the largest recipient of money from that zip code. ELFRETH FOR MARYLAND is the only Maryland candidate among the top 5 recipients. 
+
+```{r}
+highest_zip <- md_contribs |>
+  mutate(zip = str_sub(contributor_zip, start=1L, end=5L))|>
+  group_by(zip)|>
+  summarise(amount = sum(contribution_receipt_amount))|>
+  arrange(desc(amount))
+```
+
+```{r}
+highest_committee <- md_contribs |>
+  mutate(zip = str_sub(contributor_zip, start=1L, end=5L)== "20817")|>
+  group_by(committee_name)|>
+  summarise(amount = sum(contribution_receipt_amount))|>
+  arrange(desc(amount))
+```
+Q3: Let's look at top individual donors. Write code to generate a list of top donors using name and city, adding up the total amount of contributions. What does the original data say about the top two donors - who are they and what do they do? Do you see anything in the list of top 10 donors that would make you uncertain about the accuracy of these results?
+
+A3:top two donors are JACOBSEN, MELANIE and JACOBSEN, MARK P. Mark P. Jacobsen has ~three jobs banking services, banker and CEO. I'm uncertain about how he is both CEO and a banker. Could be a CEO of a bank? When I simply google the name, Mark  P Jacobsen is a doctor.The addresses match up with the person on google. In the top 10 results, I see a Mark Jacobsen without the initial 'P' I wonder if the same person is going by different names to donate more. I am also not sure how the amounts are so big given the max amount you can donate is $6600.
+
+```{r}
+highest_donor <- md_contribs |>
+  group_by(contributor_name, contributor_city)|>
+  summarise(total_amount = sum(contribution_receipt_amount))|>
+  arrange(desc(total_amount))
+
+top_two_donors <- md_contribs |>
+  filter(contributor_name %in% c("JACOBSEN, MELANIE", "JACOBSEN, MARK P."))|>
+   select(contributor_name, contributor_occupation)|>
+  distinct()
+```
