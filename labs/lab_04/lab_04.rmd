@@ -73,8 +73,8 @@ md_expenditure2 |>
 
 **Q2.** Let's do some research on the top purposes from A1. Feel free to search the Web to understand those terms better if need be, and then write a description comparing and contrasting the two campaigns' largest categories of spending.
 
-**A2.** The top category for both Alsobrooks and Hogan is Media Advertising. Next up, Alsobrooks' next top expenditures (desc) are on List Acquisition, Salary, Online Advertising, Payroll, Credit Card Fees, Fundraising Services.
-Hogan also spent most on Media Advertising, followed by Staffing Services, Printing. List Acquisition and Staffing Services seem to offer similar services.
+**A2.** The top category for both Alsobrooks and Hogan is Media Advertising. Next up, Alsobrooks' top expenditures (desc) are on List Acquisition, Salary, Online Advertising, Payroll, Credit Card Fees, Fundraising Services.
+Hogan also spent most on Media Advertising, followed by Staffing Services, Printing. 
 
 **Q3.** Pick one of the top categories for each campaign and write code that shows how that spending has changed over time, if at all. You'll need to use lubridate for this. Write a couple of sentences describing that pattern.
 
