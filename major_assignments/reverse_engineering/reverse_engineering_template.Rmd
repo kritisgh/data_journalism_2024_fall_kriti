@@ -1,7 +1,7 @@
 ---
-title: "Reverse Engineering Project"
-author: "Student names here"
-date: "Date here"
+title: "Reverse Engineering Project - Congress Older"
+author: "Kriti Singh, Leonardo Micheli, Molecule Jongwilai, Adelia McGuire"
+date: "9/28/2024"
 output:
   html_document:
     theme: cerulean
@@ -26,7 +26,6 @@ Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
 options(scipen=999) 
-library(tidyverse)
 library(tidyverse)
 ```
 
