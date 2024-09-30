@@ -105,3 +105,9 @@ when you have dates look for the boundaries
 spaces in col names are the devil 
 dont start col names beginning w a number
 rename only works on column names, does not change data 
+
+pre lab 05 columns dont need to be in the same order but they have to be named the same
+bind rows takes a whole lot of rows and combines them together
+when we are taking people we dont have a unique identifier 
+join joins on unique identifier
+negative filter 
