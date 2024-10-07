@@ -90,14 +90,38 @@ data_filtered <- census_2020_age %>%
 
 ### Sentence 3
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: [Forty-eight percent of the current Congress is made up of boomers, even though they only represented about 21 percent of the population in the most recent census. And this actually represents a decline in representation for boomers, who made up 63 percent of Congress in the mid-2010s]
+* **Analysis summary**: [Forty-eight percent of the current Congress is made up of boomers, even though they only represented about 21 percent of the population in the most recent census. And this actually represents a decline in representation for boomers, who made up 63 percent of Congress in the mid-2010s]
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+congress_age |>
+  filter(congress == "118") |>
+  summarise(
+    count_118 = n() #536
+  )
+congress_age |>
+  filter(congress == "118") |>
+  filter(generation == "Boomers") |>
+  summarise(
+    count_118_boomers = n()
+  ) #259
+(259/536)*100 #48.3209%
+congress_age |>
+  filter(congress == "114") |>
+  summarise(
+    count_114 = n() #541
+  )
+congress_age |>
+  filter(congress == "114") |>
+  filter(generation == "Boomers") |>
+  summarise(
+    count_114_boomers = n() #340
+  )
+(340/541)*100 # 62.84658%
 # Display results of code below this codeblock
-
+#The percentage of boomers in the 118th Congress is 48.3209
+# The percentage of boomers in the mid-2010s Congress (114th Congress started in 2015) was 62.84
 ```
 
 ### Sentence 4
