@@ -112,7 +112,7 @@ not_governor_rep <- not_rep |>
   )|>arrange(desc(count))
 ```
 
-**Q5** Let's find out more about those zip codes from A4. Using tidycensus, get a dataframe of Maryland zip codes and their median ages, then join it to the dataframe you produced in A4. NOTE: you'll need to ensure that the two columns you use for the join are the same datatype. Summarize your findings; how would you describe the zip codes with more non-Cox Republicans compared to those with fewer? Where are those leading zip codes located?
+**Q5** Let's find out more about those zip codes from A4. Using tidycensus, get a dataframe of Maryland zip codes and their median ages, then join it to the dataframe you produced in A4. NOTE: you'll need to ensure that the two columns you use for the join are the same datatype. Summarize your findings; how would you describe the zip codes with more non-Cox Republicans compared to those with fewer? Where are those leading zip codes located? 
 
 **A5** The zip codes with more non-Cox Republicans are in Frederick County. I feel like there is a very slight trend suggesting there are more young people in the more non-Cox zip codes. The top 5 zip codes have their median ages in the thirties. The age range across non Cox Frederick counties is from 28.6 to 47.6. The zip code with the youngest median age (21727 at 28.6 years) has few non Cox Republicans (39). Zip code with the oldest median age (21710 at 47.6 years) also has relatively few non-Cox Republicans (42).
 
