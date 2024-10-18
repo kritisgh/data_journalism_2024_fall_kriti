@@ -194,7 +194,7 @@ md10 |>
   mutate(min2010 = estimate2010-moe.x, max2010 = estimate2010+moe.x, min2022 = estimate2022-moe.y, max2022 = estimate2022+moe.y) |>
   select(-variable.x, -variable.y, -moe.x, -moe.y) |>
   mutate(change = ((estimate2022-estimate2010)/estimate2010)*100) |>
-  arrange(change)
+  arrange(estimate2010)
 ```
 
 ### Task 8: Combine with Election Data
