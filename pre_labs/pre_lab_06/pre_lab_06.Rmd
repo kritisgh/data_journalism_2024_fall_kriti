@@ -97,7 +97,7 @@ You can now export that extracted table to a CSV file using the "Export" button.
 
 ### Task 5: Export the CSV file
 
-**Task** Export the CSV file to your pre_lab_06 folder and read it into R by running the following codeblock. What problems do you see with the data? **Answer** The data has now become the header. 
+**Task** Export the CSV file to your pre_lab_06 folder and read it into R by running the following codeblock. What problems do you see with the data? **Answer** The data has now become the header. There are a lot of NA values. 
 
 ```{r}
 benzie_2024 <- read_csv("tabula-Benzie Aug 6,2024 Official Precinct Results.csv")
@@ -113,7 +113,7 @@ Then we've got rows with NAs, plus office names mixed up with candidate names. L
 
 ### Task 6: Cleaning up & getting rid of rows we don't need
 
-**Task** Get rid of rows we don't need by running the codeblock below. What problems remain? **Answer**
+**Task** Get rid of rows we don't need by running the codeblock below. What problems remain? **Answer** The titles of the headers are not descriptive. Some columns still have NA values like X29, X31-34. Candidate column also has party information that needs to be extracted.
 
 ```{r}
 benzie_2024 <- read_csv("tabula-Benzie Aug 6,2024 Official Precinct Results.csv", col_names = FALSE)
@@ -129,7 +129,7 @@ Ok, now we have numbers and candidates, but we still need better headers and a w
 
 ### Task 7: Making a party column, changing headers and adding an office column.
 
-**Task** Run the codeblock below. What changed, and what issues or problems remain? **Answer**
+**Task** Run the codeblock below. What changed, and what issues or problems remain? **Answer** There are still columns that do not have descriptive titles. Header titles are fixed for the first 9 columns. A new column 'Office' was added to include the office a candidate ran for.
 
 ```{r}
 benzie_2024 <- benzie_2024 |>
