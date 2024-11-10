@@ -58,7 +58,7 @@ ggplot(data = md_senate_county_24) +
   geom_sf(aes(fill = alsobrook_hogan_diff)) +
   scale_fill_continuous(trans = 'reverse')+
   labs(
-    title = "Alsobrooks wins 2024 MD Senate Race",
+    title = "Alsobrooks loses in most counties but wins 2024 MD Senate Race",
     fill = "Hogan V. Alsobrook Vote Percentage Difference"
   ) +
   theme_minimal()
@@ -69,7 +69,7 @@ ggplot(data = md_senate_county_24) +
 
 Also answer this: is a map the best way to present this data? What else could you make that might convey more information?
 
-**A2.**
+**A2.** Allegany was the only county where Trump got a higher percentage than Hogan. I think a map is not the best way to show this data, a grouped bar chart showing the difference between Trump and Hogan side by side is more ideal because it would really drive the point that Hogan outperformed Trump in all counties but one. This map is much too confusing and does not convey the story of Hogan outperforming Trump, I am not sure if that would be possible even if the colors had more contrast. 
 
 ```{r}
 md_pres_county_24 <- read_csv("data/md_pres_county_24.csv")|>
@@ -89,14 +89,14 @@ ggplot(data = md_joined) +
   scale_fill_continuous(trans = 'reverse')+
   labs(
     title = "Hogan Outperforms Trump in Every County",
-    fill = "Percent Difference"
+    fill = "Percentage Difference"
   ) +
   theme_minimal()
 ```
 
 **Q3** Make another map showing the difference between Larry Hogan's county-level performance this year and from his governor race in 2018, using percentages to compare the two as you did in Q2. You can use the dataframe you initially loaded for Q1, and you'll need to load the 2018 governor results in the data folder and join them to it before proceeding. Are there any counties where Hogan did better this year? How would you describe the map showing the difference?
 
-**A3**
+**A3** Hogan performed worse in 2024 than in 2018 in every county. The map shows Talbot had the biggest difference from 2018 to 2024 with a margin of 16%
 
 ```{r}
 md_gov_county_18 <- read_csv("data/md_gov_county_18.csv")|>mutate(
@@ -107,36 +107,48 @@ md_gov_county_18 <- read_csv("data/md_gov_county_18.csv")|>mutate(
 hogan_2018_v_2024 <- md_senate_county_24 |>
   left_join(md_gov_county_18, by = "GEOID") |>
   mutate(
-    hogan_pct_difference = perc_hogan - hogan_pct_2018 
-  )
+    hogan_pct_difference = perc_hogan - hogan_pct_2018 )|>
+  arrange(desc(hogan_pct_difference))
 
 md_hogan_map <- md_counties |>
-  st_join(md_hogan_performance_2018_and_2024, join = st_intersects, left = TRUE)
+  st_join(hogan_2018_v_2024, join = st_intersects, left = TRUE)
 
 ggplot(data = md_hogan_map) +
   geom_sf(aes(fill = hogan_pct_difference)) +
   scale_fill_continuous(trans = 'reverse')+
   labs(
-    title = "Larry Hogan perfroms worse in every county in 2024 Senate election compared to 2018 Govoner Race",
-    fill = "2018 Percentage Difference"
+    title = "Hogan underperforms in every county in 2024 compared to 2018",
+    fill = "2024 v. 2018 Percentage Difference"
   ) +
   theme_minimal()
-
-
-
-#md_hogan_map <- md_counties |> left_join(hogan_2018_v_2024, join_by("GEOID"))
-#md_hogan_map <- md_counties |>
-  #left_join(hogan_2018_v_2024, by = c("GEOID"))
 ```
 
 **Q4.** Choose your own map adventure! In the data folder I've included Maryland county-level results for the abortion rights amendment vote this year, plus the 2020 presidential results by county and 2022 governor's results by county. Using one of those and at least one other contest for comparison, make a county-level map showing what you think is the most interesting aspect of that data, and describe the results in terms of a possible story. You can bring in other data, such as Census information, if you like.
 
-**A4.**
+**A4.** This map shows that even in places where Trump was favored, people did vote for supporting abortion rights. I'd be interested in talking to these people and discuss how they vote for a party that does not support all their wishes. This map shows that Cecil county had a large share of non harris voters who voted favorably for abortion rights. 
 
 ```{r}
-md_pres_county_20 <- read_csv("data/md_pres_county_20.csv")
-md_abortion_24 <- read_csv("data/md_abortion_24.csv")
-md_pres_with_abortion <- md_pres_county_24 |> left_join(md_abortion_24, by=c("NAME"="County"))
+
+md_abortion_24 <- read_csv("data/md_abortion_24.csv")|>
+  mutate(for_perc = For/(For+Against)*100)|>
+           mutate(for_against = Against/(For+Against)*100)|>
+  mutate(for_against_diff = for_perc-for_against)|>
+  arrange(desc(for_against_diff))
+           
+md_pres_abortion <- md_abortion_24 |> left_join(md_pres_county_24, by = "County")|>
+  mutate(harris_votes = Harris/(Harris +Trump+Oliver+Stein+Kennedy)*100)|>
+   mutate(non_harris_abortion = for_perc - harris_votes)|>
+  arrange(desc(non_harris_abortion))
+
+md_pres_abortion <- md_counties |> left_join(md_pres_abortion, join_by("GEOID"))|>
+    arrange(desc(non_harris_abortion))
+
+ggplot() +
+  geom_sf(data = md_pres_abortion, aes(fill= non_harris_abortion)) +
+  scale_fill_continuous(trans = 'reverse')+
+  labs(
+    title="Non Harris Voting Counties Vote Favorably For Abortion Rights",
+fill ="Non Harris Abortion Percentage")
 
 ```
 
