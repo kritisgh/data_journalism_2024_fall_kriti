@@ -1,0 +1,221 @@
+---
+title: "Data Analysis Project"
+author: "Group 4"
+date: "11-16-2024"
+output:
+  html_document:
+    theme: cerulean
+    highlight: pygments
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Deliverable 2 (week 12) - 10 percent*: 
+
+*Question 1* Lists your questions - if i asked you to refine them, show me that you've done that.
+
+*Answer 1* 
+Q1. For the big picture, in *Maryland*,
+1.1 How many voters registered for each party in the 2024 primary and general election? 
+1.1.1 How have these numbers changed compared to those in previous elections?
+1.2 Compared to the total population of the state, what is the proportion of voters who register for the election?
+1.3 Compared to the 2024 presidential election result, does the registration pattern match with the result? 
+---
+Q2. At the *Congressional District level*
+2.1 How many voters registered for each party in the 2024 primary and general election?
+2.1.1 How have these numbers changed compared to those in previous elections?
+2.2 Are there any patterns for voter registration from every district?
+2.2.1 Are there any districts that don't fall into this pattern? 
+2.2.2 How are those districts different from others in terms of location, demography, economy, etc.?
+2.3 Compared to the total population of each district, what is the proportion of voters who register for the election? 
+2.3.1 What are the differences between precincts having large and small proportions of voter registration?
+2.4 Compared to the representative race result, does the registration pattern match with the result? 
+---
+Q3. At the *Legislative Districts level*
+3.1 How many voters registered for each party in the 2024 primary and general election?
+3.1.1 How have these numbers changed compared to those in previous elections?
+3.2 Are there any patterns for voter registration from every district?
+3.2.1 Are there any districts that don't fall into this pattern? 
+3.2.2 How are those districts different from others in terms of location, demography, economy, etc.?
+3.3 Compared to the total population of each district, what is the proportion of voters who register for the election? 
+3.3.1 What are the differences between precincts having large and small proportions of voter registration?
+3.4 Compared to the election result, does the registration pattern match with the result? 
+---
+Q4. At the *Precinct level*
+4.1 How many voters registered for each party in the 2024 primary and general election?
+4.1.1 How have these numbers changed compared to those in previous elections?
+4.2 Are there any patterns for voter registration from every precinct?
+4.2.1 Are there any precincts that don't fall into this pattern? 
+4.2.2 How are those precincts different from others in terms of location, demography, economy, etc.?
+4.3 Compared to the total population of each precinct, what is the proportion of voters who register for the election? 
+4.3.1 What are the differences between precincts having large and small proportions of voter registration? 
+4.4 Compared to the election result, does the registration pattern match with the result?
+---
+Q5. At the *County level*
+5.1 How many voters registered for each party in the 2024 primary and general election?
+5.1.1 How have these numbers changed compared to those in previous elections?
+5.2 Are there any patterns for voter registration from every county?
+5.2.1 Are there any counties that don't fall into this pattern? 
+5.2.2 How are those counties different from others in terms of location, demography, economy, etc.?
+5.3 Compared to the total population of each county, what is the proportion of voters who register for the election? 
+5.3.1 What are the differences between counties having large and small proportions of voter registration? 
+5.4 Compared to the 2024 presidential election result, does the registration pattern match with the result? 
+
+*Question 2* Loads and cleans the core data set to prepare for analysis.
+
+*Answer 2*
+
+```{r}
+#Load Libraries 
+library(tidyverse)
+library(janitor)
+library(tidycensus)
+library(rvest)
+library(dplyr)
+```
+
+
+```{r}
+#Prep dataframe for Q1 focusing on Maryland
+
+#Registration Data
+md_primary_24 <- read_csv("data/county/county_primary_24.csv")
+md_general_24 <- read_csv("data/county/county_general_24.csv")
+md_primary_20 <- read_csv("data/county/county_primary_20.csv")
+md_primary_20 <- md_primary_20 |>
+  rename(County = 1)
+md_general_20 <- read_csv("data/county/county_general_20.csv")
+
+#Population Data
+state_population <- get_acs(geography="state", 
+                       variables = "B01003_001", 
+                       year=2019)
+md_population <- state_population |>
+  slice(21)
+
+#Presidential Election Result
+pres_election_result_url <- "https://elections.maryland.gov/elections/2024/general_Results/gen_results_2024_1.html"
+pres_election_result_html <- pres_election_result_url |>
+  read_html() |>
+  html_table()
+pres_election_result <- pres_election_result_html[[1]]
+
+```
+```{r}
+#Prep dataframe for Q2 focusing on congressional district level
+
+#Registration Data
+congress_primary_24 <- read_csv("data/congress_level/congress_primary_24.csv")
+congress_general_24 <- read_csv("data/congress_level/congress_general_24.csv")
+congress_primary_20 <- read_csv("data/congress_level/congress_primary_20.csv")
+congress_primary_20 <- congress_primary_20 |>
+  rename(District = 1) |>
+  rename(county = 2) |>
+  rename(BAR = 3) |>
+  rename(DEM = 4) |>
+  rename(OTH = 5) |>
+  rename(REP = 6) |>
+  rename(UNA = 7) |>
+  rename(WCP = 8) |>
+  rename(total = 9) 
+congress_general_20 <- read_csv("data/congress_level/congress_general_20.csv")
+
+#Representative Election Result
+representative_election_result_url <- "https://elections.maryland.gov/elections/2024/general_Results/gen_results_2024_3.html"
+representative_election_result_html <- representative_election_result_url |>
+  read_html() |>
+  html_table()
+representative_election_result1 <- representative_election_result_html[[1]]
+representative_election_result2 <- representative_election_result_html[[2]]
+representative_election_result3 <- representative_election_result_html[[3]]
+representative_election_result4 <- representative_election_result_html[[4]]
+representative_election_result5 <- representative_election_result_html[[5]]
+representative_election_result6 <- representative_election_result_html[[6]]
+representative_election_result7 <- representative_election_result_html[[7]]
+representative_election_result8 <- representative_election_result_html[[8]]
+```
+```{r}
+#Prep dataframe for Q3 focusing on legislative district level
+
+#Registration Data
+legis_primary_24 <- read_csv("data/legis_level/legis_primary_24.csv")
+legis_general_24 <- read_csv("data/legis_level/legis_general_24.csv")
+legis_primary_20 <- read_csv("data/legis_level/legis_primary_20.csv")
+legis_general_20 <- read_csv("data/legis_level/legis_general_20.csv")
+
+```
+```{r}
+#Prep dataframe for Q5 focusing on county level
+
+#Registration Data
+county_primary_24 <- read_csv("data/county/county_primary_24.csv")
+county_general_24 <- read_csv("data/county/county_general_24.csv")
+county_primary_20 <- read_csv("data/county/county_primary_20.csv")
+county_primary_20 <- county_primary_20 |>
+  rename(County = 1)
+county_general_20 <- read_csv("data/county/county_general_20.csv")
+
+#Population Data
+county_population <- get_acs(geography="county", 
+                       variables = "B01003_001", 
+                       state = "MD", year=2019)
+
+#Presidential Election Result (county level)
+pres_election_result_county_url <- "https://elections.maryland.gov/elections/2024/general_Results/gen_detail_results_2024_1_1.html"
+pres_election_result_county_html <- pres_election_result_county_url |>
+  read_html() |>
+  html_table()
+pres_election_result_county1 <- pres_election_result_county_html[[1]]
+pres_election_result_county2 <- pres_election_result_county_html[[2]]
+pres_election_result_county2 <- pres_election_result_county2|>
+  select(-1)
+pres_election_result_county3 <- pres_election_result_county_html[[3]]
+pres_election_result_county3 <- pres_election_result_county3|>
+  select(-1)
+pres_election_result_county4 <- pres_election_result_county_html[[4]]
+pres_election_result_county4 <- pres_election_result_county4|>
+  select(-1)
+pres_election_result_county5 <- pres_election_result_county_html[[5]]
+pres_election_result_county5 <- pres_election_result_county5|>
+  select(-1)
+pres_election_result_county6 <- pres_election_result_county_html[[6]]
+pres_election_result_county6 <- pres_election_result_county6|>
+  select(-1)
+pres_election_result_county <- bind_cols(pres_election_result_county1, pres_election_result_county2, pres_election_result_county3, pres_election_result_county4, pres_election_result_county5, pres_election_result_county6)
+```
+*Question 3* Shows basic exploratory analysis to demonstrate an understanding of the dataset, including the number of rows and columns, any obvious limitations or flaws and any reasons why it might not be able to answer the questions you've posed last week.
+
+*Answer 3*
+Q1
+We may not be able to compare the change in the number of registrations for LIB and NLM parties (from primary), and NLM parties (from general) between 2024 and 2020 as the dataframes from 2020 don’t have data for these parties.
+Q2
+We may not be able to compare the change in the number of registrations at the congressional level for LIB and NLM parties (from primary), and NLM party (from general) between 2024 and 2020 as the dataframes from 2020 don’t have data for these parties. 
+Q3
+We may not be able to compare the change in the number of registrations at the legislative level for the NLM party (from both primary and general) between 2024 and 2020 as the dataframes from 2020 don’t have data for this party. 
+Q4
+Q5
+- We may not be able to compare the change in the number of registrations for LIB and NLM parties (from primary), and NLM parties (from general) between 2024 and 2020 as the dataframes from 2020 don’t have data for these parties.
+
+*Question 4* Describe the limits of the data in terms of timeframe, what is and is not included and any codes or other information you'd need to find definitions for, and what you've done to better define it.
+
+*Answer 4*
+Q1
+- The registration breakdown by county doesn’t have the total row of registrations for each party which we have to use to answer questions at the state level. We may need to find the sum ourselves.
+- The population data of Maryland is not included here. We have to download the data from the census.
+- We are not sure how to make the comparison between the voter registration and the election result data (https://elections.maryland.gov/elections/2024/general_Results/gen_results_2024_1.html) makes sense because the registration is categorized by parties but the result is categorized by candidates which some of them come from the same party.    
+Q2
+- We’re not sure whether there is population data for each congressional district, so the part of this question about comparing registration with population may not be able to answer. 
+Q3
+- We’re not sure whether there is population data for each legislative district, so the part of this question about comparing registration with population may not be able to answer. 
+- We’re not sure which election result we should use to compare with the registration data at the legislative level. 
+Q4
+- We’re not sure where or how to locate registration at the precinct level.
+Q5
+- The population data of each county in Maryland is not included here. We have to download the data from the census.
+- We are not sure how to make the comparison between the voter registration and the election result data (https://elections.maryland.gov/elections/2024/general_Results/gen_detail_results_2024_1_1.html) makes sense because the registration is categorized by parties but the result is categorized by candidates which some of them come from the same party.
