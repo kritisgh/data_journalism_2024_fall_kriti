@@ -250,7 +250,7 @@ Here we can use LLMs in a tidy manner, by starting with the dataframe and callin
 
 **Task** Run the following code and look at the .extract column. How did it do? Do the results make sense, and why or why not? 
 
-**Answer** It just keeps on loading (?) Haven't gotten a response. The installation happened fine. got a "success" message when I ran it in the terminal. 
+**Answer** It just keeps on loading (?) Haven't gotten a response. Have waited for 30 mins. Restarted and ran the code again as well. The installation happened fine. got a "success" message when I ran it in the terminal. 
 
 ```{r}
 emails |>
