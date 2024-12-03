@@ -1,4 +1,4 @@
-x`---
+---
 title: "Data Analysis Project"
 author: "Group 4"
 date: "11-16-2024"
@@ -159,9 +159,62 @@ legis_population <- get_acs(geography="state legislative district (lower chamber
                        variables = "B01003_001", state = "MD", 
                        year=2022)
 
-#Election Result 
-#Not accessible yet!
+#Presidential Election Result 
+#Download Precinct Result and Code
+precint_result <- read_csv("data/legis_level/result/result.csv")
+legis_code <- read_csv("data/legis_level/result/code.csv")
+#Prep result dataframe
+precint_result <- precint_result |>
+  filter(Contest == "President and Vice President of the United States")
+precint_result <- precint_result |>
+  select(2,4,6,7) |>
+  clean_names() |>
+  mutate(precinct_name = as.numeric(gsub("-","", precinct_name)))
+#Prep code dataframe
+legis_code <- legis_code |>
+  select(3,4,10) |>
+  filter(!is.na(ED_PRECINCT)) |>
+  filter(!is.na(LEGISLATIVE_SUB_DISTRICT_CODE))
+#Join result dataframe with code dataframe to generate legislative district results 
+legis_result_draft <- precint_result |> 
+  left_join(legis_code, join_by(jurisdiction==COUNTY_NAME, precinct_name==ED_PRECINCT)) |>
+  filter(!is.na(LEGISLATIVE_SUB_DISTRICT_CODE)) |>
+  group_by(LEGISLATIVE_SUB_DISTRICT_CODE, party) |>
+  summarise(
+    total_votes = sum(total_votes))
+#Reshape dataframe
+legis_result_DEM <- legis_result_draft |>
+  filter(party == "DEM") |>
+  select(1,3) |>
+  rename(DEM_result = 2)
+legis_result_GRN <- legis_result_draft |>
+  filter(party == "GRN") |>
+  select(3) |>
+  rename(GRN_result = 2) 
+legis_result_LIB <- legis_result_draft |>
+  filter(party == "LIB") |>
+  select(3) |>
+  rename(LIB_result = 2)
+legis_result_NON <- legis_result_draft |>
+  filter(party == "NON") |>
+  select(3) |>
+  rename(NON_result = 2)
+legis_result_REP <- legis_result_draft |>
+  filter(party == "REP") |>
+  select(3) |>
+  rename(REP_result = 2)
+legis_result_UNF <- legis_result_draft |>
+  filter(party == "UNF") |>
+  select(3) |>
+  rename(UNF_result = 2)
+
+
+legis_result <- bind_cols(legis_result_DEM, legis_result_GRN, legis_result_LIB, legis_result_NON, legis_result_REP, legis_result_UNF) |>
+  select(-3,-5,-7,-9,-11) |>
+  rename(legislative_district_code = 1)
+
 ```
+
 ```{r}
 #Prep dataframe for Q4 focusing on legislative precinct level
 
@@ -433,9 +486,50 @@ Q2. At the *Congressional District level*
 2.2.2 How are those districts different from others in terms of location, demography, economy, etc.?
 *A:.....* 
 2.3 Compared to the total population of each district, what is the proportion of voters who register for the election? 
+*A: For both Primary and General, District 5 has the most proportion of registered voters which are 69.26% for Primary and 74.12% for General. In the other hand, District 4 has the least proportion of registered voters which are 52.02% for Primary and 58.34% for General* 
 2.3.1 What are the differences between district having large and small proportions of voter registration?
-2.4 Compared to the representative race result, does the registration pattern match with the result? 
+*A:.....* 
+2.4 Compared to the representative race result, does the registration pattern match with the result?
+*A: Yes, the General registration pattern in every district is match with the pattern of the representative race result. There are more percentage of people who registered and votes for Democrats than those for Republicans in District 2 to 8, and on the contrary, there are more percentage of people who registered and votes for Republicans than those for Democrats in District 1.* 
 
+```{r}
+#Prep dataframe for Q2 focusing on congressional district level
+
+#Registration Data
+congress_primary_24 <- read_csv("data/congress_level/congress_primary_24.csv")
+congress_general_24 <- read_csv("data/congress_level/congress_general_24.csv")
+congress_primary_20 <- read_csv("data/congress_level/congress_primary_20.csv")
+congress_primary_20 <- congress_primary_20 |>
+  rename(District = 1) |>
+  rename(county = 2) |>
+  rename(BAR = 3) |>
+  rename(DEM = 4) |>
+  rename(OTH = 5) |>
+  rename(REP = 6) |>
+  rename(UNA = 7) |>
+  rename(WCP = 8) |>
+  rename(total = 9) 
+congress_general_20 <- read_csv("data/congress_level/congress_general_20.csv")
+
+#Population Data
+congress_population <- get_acs(geography="congressional district", 
+                       variables = "B01003_001", state = "MD", 
+                       year=2022)
+
+#Representative Election Result
+representative_election_result_url <- "https://elections.maryland.gov/elections/2024/general_Results/gen_results_2024_3.html"
+representative_election_result_html <- representative_election_result_url |>
+  read_html() |>
+  html_table()
+representative_election_result1 <- representative_election_result_html[[1]]
+representative_election_result2 <- representative_election_result_html[[2]]
+representative_election_result3 <- representative_election_result_html[[3]]
+representative_election_result4 <- representative_election_result_html[[4]]
+representative_election_result5 <- representative_election_result_html[[5]]
+representative_election_result6 <- representative_election_result_html[[6]]
+representative_election_result7 <- representative_election_result_html[[7]]
+representative_election_result8 <- representative_election_result_html[[8]]
+```
 ```{r}
 #Primary
 #2024
@@ -530,13 +624,175 @@ pattern_congress_general_24 <- congress_general_24 |>
 #Primary24
 total_congress_primary_24 <- congress_primary_24 |>
   select(District, TOTAL)
-regis_population_congress_primary_24 <- bind_cols(total_congress_primary_24, congress_population) |>
+cleaned_congress_population <- congress_population |>
+  rename(population = 4) |>
+  select(4)
+regis_population_congress_primary_24 <- bind_cols(total_congress_primary_24, cleaned_congress_population) |>
   mutate(Percent = (TOTAL/population)*100)
 #General24
 total_congress_general_24 <- congress_general_24 |>
   select(District, TOTAL)
-regis_population_congress_general_24 <- bind_cols(total_congress_general_24, congress_population) |>
+regis_population_congress_general_24 <- bind_cols(total_congress_general_24, cleaned_congress_population) |>
   mutate(Percent = (TOTAL/population)*100)
 
-#Compare to Election Result
+#Compare to the result
+#Clean the result
+representative_election_result1 <- representative_election_result1 |>
+  slice(-5) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, x = 4, y = 5) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(x = as.numeric(gsub("%","", x))) |>
+  mutate(y = as.numeric(gsub("%","", y))) |>
+  mutate(Other_percent_result = x+y) |>
+  select(1,2,3,6)
+representative_election_result2 <- representative_election_result2 |>
+  slice(-5) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, x = 4, y = 5) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(x = as.numeric(gsub("%","", x))) |>
+  mutate(y = as.numeric(gsub("%","", y))) |>
+  mutate(Other_percent_result = x+y) |>
+  select(1,2,3,6)
+representative_election_result3 <- representative_election_result3 |>
+  slice(-5) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, x = 4, y = 5) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(x = as.numeric(gsub("%","", x))) |>
+  mutate(y = as.numeric(gsub("%","", y))) |>
+  mutate(Other_percent_result = x+y) |>
+  select(1,2,3,6)
+representative_election_result4 <- representative_election_result4 |>
+  slice(-4) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, Other_percent_result = 4) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(Other_percent_result = as.numeric(gsub("%","", Other_percent_result)))
+representative_election_result5 <- representative_election_result5 |>
+  slice(-4) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, Other_percent_result = 4) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(Other_percent_result = as.numeric(gsub("%","", Other_percent_result)))
+representative_election_result6 <- representative_election_result6 |>
+  slice(-4) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, Other_percent_result = 4) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(Other_percent_result = as.numeric(gsub("%","", Other_percent_result)))
+representative_election_result7 <- representative_election_result7 |>
+  slice(-5) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, x = 4, y = 5) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(x = as.numeric(gsub("%","", x))) |>
+  mutate(y = as.numeric(gsub("%","", y))) |>
+  mutate(Other_percent_result = x+y) |>
+  select(1,2,3,6)
+representative_election_result8 <- representative_election_result8 |>
+  slice(-5) |>
+  select(1, 8) |>
+  pivot_longer(cols = -Name, names_to = "Party", values_to = "values") |>
+  pivot_wider(names_from = Name, values_from = values) |>
+  rename(DEM_percent_result = 2, REP_percent_result = 3, x = 4, y = 5) |>
+  mutate(DEM_percent_result = as.numeric(gsub("%","", DEM_percent_result)))|>
+  mutate(REP_percent_result = as.numeric(gsub("%","", REP_percent_result)))|>
+  mutate(x = as.numeric(gsub("%","", x))) |>
+  mutate(y = as.numeric(gsub("%","", y))) |>
+  mutate(Other_percent_result = x+y) |>
+  select(1,2,3,6)
+representative_election_result <- bind_rows(list(representative_election_result1, representative_election_result2, representative_election_result3, representative_election_result4, representative_election_result5, representative_election_result6, representative_election_result7, representative_election_result8)) |>
+  select(2,3,4)
+#Merge with the registration
+congress_general_regis_result <- bind_cols(pattern_congress_general_24, representative_election_result) |>
+  select(-2,-3,-4,-5,-6)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
